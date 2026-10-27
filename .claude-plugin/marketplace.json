@@ -1,0 +1,16 @@
+{
+  "name": "shepherd-vita",
+  "owner": {
+    "name": "Shepherd project"
+  },
+  "description": "PS Vita porting knowledge from the Shepherd project: measured hardware facts, gotchas, proven tricks and test habits for Claude.",
+  "plugins": [
+    {
+      "name": "shepherd",
+      "source": "./plugins/shepherd",
+      "description": "PS Vita game-porting knowledge for Claude: verified hardware facts, gotchas that cost device runs, proven optimisations, failed experiments, and a test-first porting process.",
+      "category": "game-development",
+      "tags": ["ps-vita", "homebrew", "porting", "optimization", "unity", "mono"]
+    }
+  ]
+}

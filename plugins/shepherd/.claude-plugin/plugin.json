@@ -1,0 +1,10 @@
+{
+  "name": "shepherd",
+  "displayName": "Shepherd for PS Vita",
+  "version": "0.1.0",
+  "description": "PS Vita game-porting knowledge: verified hardware facts, gotchas, proven optimisations, failed experiments and a test-first porting process, learned porting a modern Unity game to the Vita.",
+  "author": {
+    "name": "Shepherd project"
+  },
+  "keywords": ["ps-vita", "vita", "homebrew", "porting", "optimization", "unity", "mono", "vitasdk", "vitagl"]
+}
