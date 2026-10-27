@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 -- the engine, released early
+- The Shepherd engine's first public release (separate source tree, MIT): Mono (.NET 8) fork for the Vita, Unity internal calls in C#,
+  vitaGL renderer, Unity-exact 2D physics on Box2D, FMOD-compatible audio, Vita host + launcher, Mac-side tools, vlx off-device harness.
+  Exported from the private port with gates: no private paths, binaries or game file types, no derived (decompiled) content, no FMOD
+  bank key; 24 of 25 C# projects build from the clean export.
+- New skill `shepherd-engine`: how the engine works, the order that worked, the hard rules, the first-game seams.
+
 ## 0.3.0 -- portable tools
 - `tools/vita-imports.py`: imports by library from the linker's ELF (pure Python); `--module-load-libs` (0x8002D003, GT-001),
   `--allow-libs`, `--forbid network|kernel|jit|hooks`, `--allow-func`, `--allow-newlib-net`; `module-load-libs.example.txt`.

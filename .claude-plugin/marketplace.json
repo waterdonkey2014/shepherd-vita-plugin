@@ -1,7 +1,7 @@
 {
   "name": "shepherd-vita",
   "owner": {
-    "name": "Shepherd project"
+    "name": "NOVA"
   },
   "description": "PS Vita porting knowledge and tools from the Shepherd project: measured hardware facts, gotchas, proven tricks, an idea catalog and build / log tools for Claude.",
   "plugins": [

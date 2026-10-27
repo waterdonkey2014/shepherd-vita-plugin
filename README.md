@@ -3,7 +3,7 @@
 PS Vita game-porting knowledge for Claude, from the **Shepherd** project (a from-scratch Unity stand-in engine that runs a modern Unity
 game's own compiled C# on a Mono runtime ported to the Vita). Weeks of device runs, condensed so your Claude doesn't have to relearn them.
 
-**Version 0.3 -- knowledge, the idea catalog and portable tools.** The Shepherd engine itself follows as an early open-source release, so people porting other games can fill its gaps and send findings back.
+**Version 0.4 -- knowledge, the idea catalog, portable tools, and the engine.** The Shepherd engine (MIT) is released early alongside it, so people porting other games can fill its gaps and send findings back.
 
 ## What's inside
 | Skill | Use it for |
@@ -15,6 +15,7 @@ game's own compiled C# on a Mono runtime ported to the Vita). Weeks of device ru
 | `vita-port-process` | The kit process: fidelity first, parallel tracks, review, integration, device runs |
 | `vita-knowledge` | The numbered knowledge base (VERIFIED / OBSERVED / EXPERIMENTAL / FAILED entries with evidence) and the idea catalog: ~340 techniques in 12 categories, each labelled with its status and whether it keeps output exact |
 | `vita-tools` | Running the tools below: after a build (imports, package), after a device run (pull logs, numbers, history), adding measurement |
+| `shepherd-engine` | Porting a Unity game with the Shepherd engine: how it works, the order that worked, the hard rules, the first-game seams to fix |
 | `optimization-patterns` | Platform-neutral patterns (loading, memory, CPU, rendering, build-time, runtime): when each helps, when it hurts, how to measure it |
 | `vita-record-discovery` | Writing up your own finding (success or failure) in the knowledge-base format, ready to contribute |
 
@@ -57,8 +58,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Failed experiments are as welcome as suc
 ## Roadmap
 - v0.1: knowledge skills
 - v0.2: the idea catalog + general optimisation patterns
-- v0.3: portable tools (this release); the off-device Vita harness follows with the engine
-- Engine: an early public release of Shepherd (MIT), not waiting for polish -- gaps get filled by people porting their own games
+- v0.3: portable tools
+- v0.4: the Shepherd engine's early public release (MIT) + the `shepherd-engine` skill (this release); the off-device harness (vlx) ships inside the engine
 
 ## Licence
 MIT -- see [LICENSE](LICENSE).
