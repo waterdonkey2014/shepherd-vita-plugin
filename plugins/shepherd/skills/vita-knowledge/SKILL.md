@@ -3,7 +3,7 @@ name: vita-knowledge
 description: The Shepherd PS Vita knowledge base -- numbered entries (VH hardware, GT gotchas, TR tricks, FA failed experiments, EX experimental) with evidence, plus an idea catalog of ~340 labelled techniques by category (runtime / JIT, memory, engine, fidelity, power, loading, GPU, UI, animation, multicore, world streaming, dropped). Each has a status (VERIFIED, OBSERVED, EXPERIMENTAL, FAILED, THEORETICAL) and whether it keeps output exact. Use to look up whether a technique has been tried or planned on the Vita, what it measured, what it conflicts with, or before proposing an optimisation that may already have failed or been dropped.
 ---
 
-# Shepherd Vita knowledge base (v0.2)
+# Shepherd Vita knowledge base (v0.3)
 
 Look up the file for the topic instead of loading everything:
 

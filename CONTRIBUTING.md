@@ -18,3 +18,8 @@ Failed experiments are valuable -- submit them too.
 - AI-generated claims are not accepted as verified without evidence.
 - Entries get the next free ID in their file (VH / GT / TR / FA / EX). Never renumber an existing entry.
 - Don't include game files, copyrighted assets, private paths or credentials.
+
+## Tools
+Changes to `plugins/shepherd/tools/` need `python3 tests/test_tools.py` to pass, and a new check needs a test that fails without it
+(a negative control). Tools stay standard-library Python 3.8+ / POSIX sh, read-only towards the user's memory card, and MIT.
+

@@ -3,14 +3,21 @@
   "owner": {
     "name": "Shepherd project"
   },
-  "description": "PS Vita porting knowledge from the Shepherd project: measured hardware facts, gotchas, proven tricks and test habits for Claude.",
+  "description": "PS Vita porting knowledge and tools from the Shepherd project: measured hardware facts, gotchas, proven tricks, an idea catalog and build / log tools for Claude.",
   "plugins": [
     {
       "name": "shepherd",
       "source": "./plugins/shepherd",
-      "description": "PS Vita game-porting knowledge for Claude: verified hardware facts, gotchas that cost device runs, proven optimisations, failed experiments, and a test-first porting process.",
+      "description": "PS Vita game-porting knowledge and tools for Claude: verified hardware facts, gotchas that cost device runs, proven optimisations, failed experiments, an idea catalog, a test-first porting process, and build / log tools.",
       "category": "game-development",
-      "tags": ["ps-vita", "homebrew", "porting", "optimization", "unity", "mono"]
+      "tags": [
+        "ps-vita",
+        "homebrew",
+        "porting",
+        "optimization",
+        "unity",
+        "mono"
+      ]
     }
   ]
 }

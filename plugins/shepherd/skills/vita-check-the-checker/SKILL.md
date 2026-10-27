@@ -25,3 +25,10 @@ not model:
 4. **Turn each lesson into a build-time check where possible** (e.g. a module-import allow-list that fails the build), so it can't
    regress silently.
 5. **Write down what the harness cannot model** (relocations, real GPU timing, thermal) so nobody reads a pass as proof of those.
+
+## Break the checker on purpose
+When a new test suite passes on its first run, make sure it can fail: copy the code, plant one bug per check (a check that always
+passes, an off-by-one in a percentile, a skipped filter), run the tests, and expect each planted bug to fail at least one test. The
+plugin's own tools were checked this way (12 planted bugs, 12 caught); `tests/test_tools.py` in the plugin repository shows the
+fixtures (a synthetic ELF, param.sfo, VPKs, logs, a fake memory card that must be byte-identical afterwards).
+

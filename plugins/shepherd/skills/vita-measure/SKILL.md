@@ -21,10 +21,26 @@ Numbers decide what goes in. These habits came from runs where the numbers were 
 - **A black box**: the last N log lines kept in RAM and written on a fail / stall; every log line flushed as written (a crash must not
   eat the lines before it).
 
+## The SM line format (what the plugin's tools read)
+One line per measurement, greppable, `key=value` with no spaces in values (a prefix such as a timestamp is fine):
+```
+SM BEGIN app=<name> build=<text>
+SM CLK when=<start|end|...> reported=<MHz> measured=<MHz> step=<MHz, 0 = not a clock step>
+SM MEM tag=<checkpoint> user_kib=<n> cdram_kib=<n> phycont_kib=<n> [largest_kib=<n>]
+SM BOOT tag=<milestone> ms=<ms since process start>
+SM FRAME n=<frame> ms=<ms> [render_ms=<ms>] [gc_ms=<ms>]          (optional; a card write each)
+SM FRAMES window=<label> n=.. mean_ms=.. p50_ms=.. p95_ms=.. p99_ms=.. max_ms=.. fps=..
+SM GC pause_ms=<ms>
+SM SUSP lost_ms=<ms>
+SM END result=<PASS|FAIL> reason="<text>"
+```
+`${CLAUDE_PLUGIN_ROOT}/tools/c/shepherd_measure.h` writes these from C; `tools/vita-runlog.py` turns them into stats and a history
+(`stats`, `add`, `show`, `compare`), and maps other formats with a `--spec` file. See the `vita-tools` skill.
+
 ## Comparing runs
 - Compare the same app, the same screen, the same window, the same clock. Label every number: MEASURED (device), VLX / EMULATED, DERIVED,
   ESTIMATE.
-- Keep a version-by-version history (one row per run) generated from the logs by a script -- never by hand -- and make the script record
+- Keep a version-by-version history (one row per run) generated from the logs by a script (`vita-runlog.py add`) -- never by hand -- and make the script record
   the measured clock and include every log pull (main and extra runs). A history tool that silently picks the wrong runs is worse than none
   (see `vita-check-the-checker`).
 - An idle menu is a poor test for game-logic changes (a JIT moved render time, not logic time, at idle): measure the work you changed.

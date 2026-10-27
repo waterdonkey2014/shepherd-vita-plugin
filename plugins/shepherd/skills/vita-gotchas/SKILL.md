@@ -1,6 +1,6 @@
 ---
 name: vita-gotchas
-description: Checklist of PS Vita porting gotchas that each cost a real device run -- module loads refusing late libraries (0x8002D003), the hardware video decoder's output delay, vitaGL taking all CDRAM/PHYCONT (0x80024302), process time stopping during suspend, shader cache size, fragmentation, SGen size classes, rooted paths, the .NET SDK commit stamp, clock reporting, card copying. Use before a first device run, when a device run fails with an error code, or when designing loaders, video, suspend handling or memory layouts.
+description: Checklist of PS Vita porting gotchas that each cost a real device run -- module loads refusing late libraries (0x8002D003), the hardware video decoder's output delay, vitaGL taking all CDRAM/PHYCONT (0x80024302), process time stopping during suspend, shader cache size, fragmentation, SGen size classes, rooted paths, the .NET SDK commit stamp, clock reporting, card copying, newlib's hidden SceNet imports. Use before a first device run, when a device run fails with an error code, or when designing loaders, video, suspend handling or memory layouts.
 ---
 
 # Vita gotchas -- read before your first device run
@@ -33,5 +33,11 @@ Each item below cost at least one device run. IDs refer to `${CLAUDE_PLUGIN_ROOT
     clock; measure the clock yourself.
 12. **GT-012 Copying to the card by hand:** Finder's "Replace" on a folder deletes the card folder's contents -- copy files, not folders.
     macOS also leaves `._` AppleDouble files on exFAT cards: harmless, skip them in scans.
-13. **GT-013 Test harnesses lie by omission.** An emulator / host harness that doesn't model import binding, decoder delay or suspend
-    clocks passes builds the device refuses. See `vita-check-the-checker`.
+13. **GT-013 A "green" end can need a menu response.** Scripted test starts whose only press was the title screen counted 0 menu
+    responses and ended red with nothing wrong: count the title press, or make every scripted step move the menu once.
+14. **GT-014 vitasdk's newlib imports SceNet in every program** (`sceNetRecv` / `sceNetSend` / `sceNetSocketClose`, for socket-aware
+    read / write / close). Fine in an eboot; a module carrying them is refused with `0x8002D003` (GT-001). Check with
+    `python3 ${CLAUDE_PLUGIN_ROOT}/tools/vita-imports.py build/app.elf --module-load-libs <list>` before a device run.
+
+Also: test harnesses lie by omission -- an emulator / host harness that doesn't model import binding, decoder delay or suspend clocks
+passes builds the device refuses (FA-007; see `vita-check-the-checker`).

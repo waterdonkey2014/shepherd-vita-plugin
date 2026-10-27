@@ -70,3 +70,14 @@ off-device with the failure reproduced first).
 - Status: VERIFIED. Category: testing.
 - Problem: test starts whose only press was the title screen counted 0 menu responses and ended red although nothing failed.
 - Fix: count the title press, or put one menu move in every scripted step.
+
+### GT-014 -- vitasdk's newlib imports SceNet in every program
+- Status: VERIFIED (reproducible: the link map of any vitasdk newlib program; on device, eboots carrying these imports ran and a module
+  carrying them was refused). Category: loading / linking.
+- Problem: newlib's `libc.a` makes read / write / close work on sockets -- `syscalls.o` imports `sceNetRecv` / `sceNetSend`, `io.o`
+  imports `sceNetSocketClose` -- so a program with no networking at all still imports SceNet. An eboot runs fine with it. A module loaded
+  with `sceKernelLoadStartModule` is refused with `0x8002D003` unless libnet is already loaded (GT-001), and a "no network imports"
+  policy flags it.
+- Fix: in a module, bind those three at first use (trampolines, as in GT-001) or supply replacements; for a network-free eboot policy,
+  exempt exactly those three (`vita-imports.py --allow-newlib-net`).
+- Found: running the plugin's import check on its own example program (v0.3), traced with `-Wl,-Map,--cref`.

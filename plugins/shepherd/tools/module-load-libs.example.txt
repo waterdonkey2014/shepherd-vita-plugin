@@ -1,0 +1,39 @@
+# Example list for vita-imports.py --module-load-libs: the libraries an engine MODULE could import when a small launcher eboot loaded it
+# with sceKernelLoadStartModule (knowledge base GT-001, TR-010). Any other import made the Vita refuse the module with 0x8002D003
+# (SCE_KERNEL_ERROR_MODULEMGR_NO_LIB).
+#
+# Observed on one PCH-2000, firmware 3.65 + Enso (HENkaku / taiHEN), in October 2026, for a launcher that had already loaded
+# SCE_SYSMODULE_AVCDEC (to play a splash video) before loading the module. YOUR list depends on what your launcher has loaded by then:
+#   - start from this file, then add a library only with evidence it is loaded at that moment (the launcher imports and calls it, or
+#     loads it with sceSysmoduleLoadModule before sceKernelLoadStartModule);
+#   - NOT here on purpose: SceShaccCg (libshacccg.suprx, loaded late by the shader-compiler wrapper inside vitaGL's init), SceNet
+#     (needs sceSysmoduleLoadModule(SCE_SYSMODULE_NET)), SceNgs / ScePerf (loaded at run time) -- bind those at first use with
+#     taiGetModuleExportFunc trampolines, or load them before the module;
+#   - taihen is present because HENkaku / Enso is; on other setups check it.
+# Contributions from other models and firmwares are welcome (see CONTRIBUTING.md).
+SceLibKernel
+SceThreadmgr
+SceThreadmgrCoredumpTime
+SceSysmem
+SceIofilemgr
+SceProcessmgr
+SceModulemgr
+SceRtcUser
+SceLibRng
+SceCtrl
+SceDisplay
+SceDisplayUser
+ScePower
+SceTouch
+SceAudio
+SceAudiodecUser
+SceVideodecUser
+SceGxm
+SceGxmInternalForVsh
+SceSharedFb
+SceDmacmgr
+SceAppMgrUser
+SceCommonDialog
+SceVshBridge
+SceSysmodule
+taihen

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 -- portable tools
+- `tools/vita-imports.py`: imports by library from the linker's ELF (pure Python); `--module-load-libs` (0x8002D003, GT-001),
+  `--allow-libs`, `--forbid network|kernel|jit|hooks`, `--allow-func`, `--allow-newlib-net`; `module-load-libs.example.txt`.
+- `tools/vita-vpk-check.py`: param.sfo fields and file list; required files, TITLE_ID, ATTRIBUTE2, forbidden types, size, macOS leftovers.
+- `tools/vita-runlog.py`: `stats` / `add` / `show` / `compare` over `SM` log lines (or any format via `--spec`); measured clock wins, no
+  percentages across clocks, STALE and no-END warnings, no duplicate runs.
+- `tools/vita-pull-logs.sh`: read-only log + crash-dump copy from a VitaShell-mounted memory card, with a manifest.
+- `tools/c/shepherd_measure.h` + `measure_example.c`: C instrumentation writing the `SM` lines (EXPERIMENTAL until a device run).
+- New skill `vita-tools`; the `SM` format in `vita-measure`; "break the checker on purpose" in `vita-check-the-checker`.
+- New gotcha GT-014: vitasdk's newlib imports SceNet in every program (found by the import checker on its own example).
+- Fixed: the `vita-gotchas` skill's item 13 named the wrong entry.
+- `tests/test_tools.py`: 19 tests with negative controls, synthetic fixtures (no binaries in the repo), optional host-C and vitasdk runs;
+  12 planted bugs all caught.
+
 ## 0.2.0 -- the idea catalog
 - `vita-knowledge/catalog/`: 343 labelled ideas in 12 categories -- runtime / JIT (RT), memory (MEM), engine (ENG), fidelity (FID),
   power and clocks (PWR), loading (LOAD), GPU (GPU), UI (UI), animation (ANIM), multicore (CORE), world streaming (WORLD) and dropped
