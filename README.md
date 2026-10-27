@@ -3,7 +3,7 @@
 PS Vita game-porting knowledge for Claude, from the **Shepherd** project (a from-scratch Unity stand-in engine that runs a modern Unity
 game's own compiled C# on a Mono runtime ported to the Vita). Weeks of device runs, condensed so your Claude doesn't have to relearn them.
 
-**Version 0.1 -- knowledge only.** No engine code yet (Shepherd's engine is planned to be open-sourced after its first port is finished).
+**Version 0.1 -- knowledge only.** The Shepherd engine itself follows as an early open-source release, so people porting other games can fill its gaps and send findings back.
 
 ## What's inside
 | Skill | Use it for |
@@ -14,6 +14,7 @@ game's own compiled C# on a Mono runtime ported to the Vita). Weeks of device ru
 | `vita-check-the-checker` | Making off-device tests catch what the device catches |
 | `vita-port-process` | The kit process: fidelity first, parallel tracks, review, integration, device runs |
 | `vita-knowledge` | The numbered knowledge base: VERIFIED / OBSERVED / EXPERIMENTAL / FAILED entries with evidence |
+| `vita-record-discovery` | Writing up your own finding (success or failure) in the knowledge-base format, ready to contribute |
 
 Claude loads a skill only when a task needs it, so the plugin stays light.
 
@@ -44,7 +45,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Failed experiments are as welcome as suc
 - v0.1: knowledge skills (this release)
 - v0.2: the idea catalog (hundreds of planned / tested techniques, labelled), category by category
 - v0.3: portable tools (module-import check, run-history script, log helpers, later the off-device Vita harness)
-- v1.0: the Shepherd engine
+- Engine: an early public release of Shepherd (MIT), not waiting for polish -- gaps get filled by people porting their own games
 
 ## Licence
-Not chosen yet -- no licence is granted until one is added.
+MIT -- see [LICENSE](LICENSE).

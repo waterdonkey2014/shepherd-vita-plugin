@@ -6,5 +6,16 @@
   "author": {
     "name": "Shepherd project"
   },
-  "keywords": ["ps-vita", "vita", "homebrew", "porting", "optimization", "unity", "mono", "vitasdk", "vitagl"]
+  "keywords": [
+    "ps-vita",
+    "vita",
+    "homebrew",
+    "porting",
+    "optimization",
+    "unity",
+    "mono",
+    "vitasdk",
+    "vitagl"
+  ],
+  "license": "MIT"
 }
