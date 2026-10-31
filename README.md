@@ -40,6 +40,9 @@ In Claude Code:
 ```
 (`<owner>/<repo>` = this repository once it is published.)
 
+Progress of the first port, every kit done and planned: the Shepherd engine repository's `docs/ledger/` page
+(`https://<owner>.github.io/shepherd/ledger/` once it is public).
+
 ## Updates
 New versions are published here as the port and the community learn more. Update with:
 ```
