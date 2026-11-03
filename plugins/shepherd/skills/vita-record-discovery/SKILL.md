@@ -1,6 +1,6 @@
 ---
 name: vita-record-discovery
-description: Write up a PS Vita porting finding -- a technique that worked, a failure, a hardware measurement or a gotcha -- in the Shepherd knowledge-base format (ID, status, category, problem, fix, evidence, limits), keep it in the user's project, and send it back to the Shepherd project if the user chose that (asked once, the first time the plugin is used; they can change it any time by asking). Use after an experiment succeeds or fails on a Vita, after a device run teaches something new, or when the user wants to share a finding or change their sharing choice.
+description: Write up a PS Vita porting finding -- a technique that worked, a failure, a hardware measurement or a gotcha -- in the Shepherd knowledge-base format (ID, status, category, problem, fix, evidence, limits), keep it in the user's project, and send it back to the Shepherd project if the user chose that (asked once per project folder or git worktree; they can change it any time by asking). Use after an experiment succeeds or fails on a Vita, after a device run teaches something new, or when the user wants to share a finding or change their sharing choice.
 ---
 
 # Recording a Vita discovery
@@ -32,17 +32,21 @@ Save it in the user's own project notes (e.g. `docs/vita-discoveries.md`) so the
 files (updates replace them).
 
 ## 4. Send it back to Shepherd, if the user chose that
-The user's choice is one word in `${CLAUDE_PLUGIN_DATA}/sharing`; the plugin's session-start note states it too. If that path came
-through unexpanded (it still starts with a dollar sign), the folder is `~/.claude/plugins/data/shepherd-shepherd-vita/`.
-- **No file: they've never been asked.** Ask once, now, in one short question (a multiple-choice question if your tools have one):
-  "Send new findings back to the Shepherd project so the engine and its knowledge base improve?" -- *Yes, send them* / *Yes, but show
-  me each one first* / *No thanks*. Say that findings go out as public GitHub issues under their account, and that the engine and the
-  plugin work the same either way. Save `on`, `review` or `off` (create the folder if needed) and don't ask again.
+The choice belongs to the project folder, and a git worktree counts as its own folder. A new project or a new worktree is asked
+once, and a folder that has answered is never asked again, in this session or later. The plugin's session-start note states this
+folder's choice and the exact command that saves it. If there's no note, check it yourself:
+`CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR}" sh "${CLAUDE_PLUGIN_ROOT}/scripts/sharing.sh" get`
+(`set on|review|off` in place of `get` saves it). The script keeps one small file per folder in the plugin's data folder and writes
+nothing into the project.
+- **unset: this folder has never been asked.** Ask once, now, in one short question (a multiple-choice question if your tools have
+  one): "Send new findings back to the Shepherd project so the engine and its knowledge base improve?" -- *Yes, send them* / *Yes,
+  but show me each one first* / *No thanks*. Say that findings go out as public GitHub issues under their account, and that the
+  engine and the plugin work the same either way. Save the answer (`on`, `review` or `off`) right away.
 - **on** -- send it (step 5), then give them the issue link in one line.
 - **review** -- show them the issue text; send it only when they say yes.
 - **off** -- keep it in their notes and don't bring sharing up.
 
-They can change their mind any time just by asking ("stop sending findings", "send them again", "show me each one first"): write the
+They can change their mind any time just by asking ("stop sending findings", "send them again", "show me each one first"): save the
 new word and confirm in one line. Nothing is ever collected automatically; the plugin has no telemetry.
 
 ## 5. How to send it

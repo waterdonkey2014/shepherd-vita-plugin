@@ -6,11 +6,13 @@
   EX-010 (bytecode inlining and hoisting); GT-015 (fast local loads expose races), GT-016 (AOT covers only what ran during the emit),
   GT-017 (inflate an eboot before searching it); catalog rows RT-062..066, ENG-023..024, MEM-033, FID-016, LOAD-049; patterns OP-029
   (skip the iterations that do nothing) and OP-030 (decouple display rate from logic and animation rates).
-- Sending findings back is now an explicit choice: the first time Claude uses the plugin it asks once whether new findings should go
-  back to Shepherd (*send them*, *show me each one first*, *no thanks*), and the answer is kept (`on` / `review` / `off` in the plugin's
-  data folder). Change it any time by asking Claude. A session-start hook (`hooks/session-start.sh`) tells Claude the current choice;
-  it only prints text. `vita-record-discovery` follows the choice and sends a finding as a GitHub issue (scrubbed, one per finding).
-  The engine and the plugin work the same either way; there is no telemetry.
+- Sending findings back is now an explicit choice: the first time Claude uses the plugin in a project it asks once whether new
+  findings should go back to Shepherd (*send them*, *show me each one first*, *no thanks*). The answer belongs to that project folder;
+  a git worktree counts as its own folder, so a new worktree is asked once more, and a folder that has answered is never asked again.
+  Change it any time by asking Claude. `scripts/sharing.sh` keeps one word per folder (`on` / `review` / `off`) in the plugin's data
+  folder, never in the project; the session-start hook runs its `note` mode, which only prints text. `vita-record-discovery` follows
+  the choice and sends a finding as a GitHub issue (scrubbed, one per finding). The engine and the plugin work the same either way;
+  there is no telemetry.
 - New tool `tools/vita-scrub-log.py`: a copy of a log that's safe to attach publicly (home paths, console / Steam IDs, addresses, MACs,
   e-mails, account names removed; timings, sizes, clocks and error codes kept); `--check` for a file; tests with a negative control.
 - New issue templates: **Device measurement** and **Game port report** (beside **Vita discovery**).

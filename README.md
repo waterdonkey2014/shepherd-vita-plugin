@@ -51,17 +51,20 @@ claude plugin update shepherd@shepherd-vita
 or turn on auto-update for the `shepherd-vita` marketplace in the `/plugin` menu.
 
 ## Sending findings back (your choice)
-The first time Claude uses the plugin, it asks you once whether new findings from your own port -- fixes, failures, measurements,
-gotchas -- should go back to the Shepherd project, so the engine and this knowledge base keep improving for everyone. Choices: *yes,
-send them*, *yes, but show me each one first*, or *no thanks*. Change your mind any time by telling Claude ("stop sending findings",
-"show me each one first"). Whatever you pick, the engine and the plugin work exactly the same: they're free and open source either way.
+The first time Claude uses the plugin in a project, it asks you once whether new findings from your port -- fixes, failures,
+measurements, gotchas -- should go back to the Shepherd project, so the engine and this knowledge base keep improving for everyone.
+Choices: *yes, send them*, *yes, but show me each one first*, or *no thanks*. Change your mind any time by telling Claude ("stop
+sending findings", "show me each one first"). Whatever you pick, the engine and the plugin work exactly the same: they're free and
+open source either way.
 
+- The answer belongs to that project folder. A git worktree counts as its own folder, so branching off into a new worktree (and a new
+  chat there) asks once more; a folder that has answered, yes or no, is never asked again.
 - Findings are written up in your project's notes whichever you choose. Sending one means a GitHub issue posted under your account
   (public), with logs run through `vita-scrub-log.py` and never game files, private paths, credentials or your private code.
 - Nothing is collected automatically; the plugin has no telemetry.
-- Your choice is one word (`on`, `review` or `off`) in the plugin's data folder (`~/.claude/plugins/data/shepherd-shepherd-vita/sharing`).
-  A small session-start hook (`hooks/session-start.sh`) reads it and tells Claude; it only prints text, and it writes and sends
-  nothing.
+- Each folder's answer is one word (`on`, `review` or `off`) in a small file under the plugin's data folder
+  (`~/.claude/plugins/data/shepherd-shepherd-vita/choices/`); nothing is written into your project. A session-start hook runs
+  `scripts/sharing.sh note`, which reads the answer and tells Claude; it only prints text.
 
 ## Status labels
 VERIFIED (measured on a Vita) · OBSERVED · EXPERIMENTAL (passes off-device tests, not yet on a device) · FAILED (kept on purpose) ·

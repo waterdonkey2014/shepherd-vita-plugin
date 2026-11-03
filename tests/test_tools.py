@@ -426,74 +426,141 @@ class ScrubLog(unittest.TestCase):
             shutil.rmtree(d)
 
 
-class SharingHook(unittest.TestCase):
-    """hooks/session-start.sh: one note per choice (never asked / on / review / off); reads only, writes nothing, always exits 0."""
-    HOOK = os.path.join(ROOT, "plugins", "shepherd", "hooks", "session-start.sh")
+class Sharing(unittest.TestCase):
+    """scripts/sharing.sh: one choice per project folder (a git worktree is its own folder), kept in the plugin's data folder.
+    note / get read only, never write and always exit 0; set accepts only on / review / off."""
+    SCRIPT = os.path.join(ROOT, "plugins", "shepherd", "scripts", "sharing.sh")
     KEYS = {"unset": "hasn't been asked yet", "on": "chose to send new findings back to the Shepherd project. When",
             "review": "but to see each one first", "off": "chose not to send findings back"}
 
-    def hook(self, content=None, env_data=True):
-        d = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, d, True)
-        data = os.path.join(d, "data")
-        os.mkdir(data)
-        if content is not None:
-            with open(os.path.join(data, "sharing"), "w") as f:
-                f.write(content)
-        env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PLUGIN_DATA"}
-        if env_data:
-            env["CLAUDE_PLUGIN_DATA"] = data
-        else:
-            env["HOME"] = d
-        before = sorted(os.listdir(data))
-        p = subprocess.run(["sh", self.HOOK], capture_output=True, text=True, env=env)
-        self.assertEqual(p.returncode, 0, p.stderr)
-        self.assertEqual(p.stderr, "")
-        self.assertEqual(sorted(os.listdir(data)), before, "the hook must not write")
-        return p.stdout
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.data = os.path.join(self.tmp, "plugin data")
+        self.proj = self.folder("my game's project")
+
+    def folder(self, name):
+        d = os.path.join(self.tmp, name)
+        os.makedirs(d, exist_ok=True)
+        return d
+
+    def sh(self, *args, proj=None, env_extra=None, data=True):
+        env = {k: v for k, v in os.environ.items() if k not in ("CLAUDE_PLUGIN_DATA", "CLAUDE_PROJECT_DIR")}
+        if data:
+            env["CLAUDE_PLUGIN_DATA"] = self.data
+        env["CLAUDE_PROJECT_DIR"] = proj or self.proj
+        env.update(env_extra or {})
+        p = subprocess.run(["sh", self.SCRIPT] + list(args), capture_output=True, text=True, env=env, cwd=self.tmp)
+        return p.returncode, p.stdout, p.stderr
+
+    def files(self):
+        out = []
+        for base, _, names in os.walk(self.tmp):
+            out += [os.path.join(base, n) for n in names]
+        return sorted(out)
+
+    def read(self, *args, **kw):
+        before = self.files()
+        rc, out, err = self.sh(*args, **kw)
+        self.assertEqual((rc, err), (0, ""))
+        self.assertEqual(self.files(), before, "note / get must not write")
+        return out
 
     def only(self, out, state):
         for s, key in self.KEYS.items():
             (self.assertIn if s == state else self.assertNotIn)(key, out, "state %s" % state)
 
+    def put(self, word, proj=None):
+        rc, out, err = self.sh("set", word, proj=proj)
+        self.assertEqual(rc, 0, err)
+
     def test_each_choice(self):
-        self.only(self.hook(None), "unset")
-        self.only(self.hook("on\n"), "on")
-        self.only(self.hook("review"), "review")
-        self.only(self.hook("off\n"), "off")
-        self.only(self.hook("  OFF\r\n"), "off")
+        self.only(self.read("note"), "unset")
+        self.only(self.read(), "unset")                      # note is the default
+        for word in ("on", "review", "off"):
+            self.put(word)
+            self.only(self.read("note"), word)
+            self.assertEqual(self.read("get").strip(), word)
 
-    def test_unknown_word_means_never_asked(self):
-        # negative control: anything but on / review / off must not read as a yes
-        for junk in ("yes", "", "on off", "0"):
-            self.only(self.hook(junk), "unset")
+    def test_answer_is_kept_for_the_folder(self):
+        self.put("off")
+        for _ in range(3):                                    # later sessions in the same folder
+            self.only(self.read("note"), "off")
 
-    def test_fallback_folder_without_plugin_data(self):
-        d = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, d, True)
-        folder = os.path.join(d, ".claude", "plugins", "data", "shepherd-shepherd-vita")
-        os.makedirs(folder)
-        with open(os.path.join(folder, "sharing"), "w") as f:
-            f.write("review\n")
-        env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PLUGIN_DATA"}
-        env["HOME"] = d
-        p = subprocess.run(["sh", self.HOOK], capture_output=True, text=True, env=env)
-        self.assertEqual(p.returncode, 0)
-        self.only(p.stdout, "review")
+    def test_folders_are_independent(self):
+        other = self.folder("another game")
+        self.put("off")
+        self.assertEqual(self.read("get", proj=other).strip(), "unset")
+        self.put("on", proj=other)
+        self.assertEqual(self.read("get").strip(), "off")
 
-    @unittest.skipIf(hasattr(os, "geteuid") and os.geteuid() == 0, "root reads anything")
-    def test_unreadable_file_is_never_asked(self):
-        d = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, d, True)
-        f = os.path.join(d, "sharing")
-        with open(f, "w") as fh:
-            fh.write("on\n")
+    @unittest.skipUnless(shutil.which("git"), "no git")
+    def test_worktree_is_asked_again_and_subfolders_share(self):
+        def git(*a, cwd):
+            subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.com"] + list(a), cwd=cwd, check=True,
+                           capture_output=True)
+        repo = self.folder("repo")
+        git("init", "-q", cwd=repo)
+        git("commit", "-q", "--allow-empty", "-m", "init", cwd=repo)
+        wt = os.path.join(self.tmp, "repo-branch")
+        git("worktree", "add", "-q", wt, cwd=repo)
+        sub = os.path.join(repo, "src", "deep")
+        os.makedirs(sub)
+        self.put("off", proj=sub)
+        self.assertEqual(self.read("get", proj=repo).strip(), "off")
+        self.assertEqual(self.read("get", proj=wt).strip(), "unset")      # the new worktree asks once
+        self.put("review", proj=wt)
+        self.assertEqual(self.read("get", proj=wt).strip(), "review")
+        self.assertEqual(self.read("get", proj=repo).strip(), "off")       # and doesn't change the original
+
+    def test_printed_command_saves_for_this_folder(self):
+        # the note's command must work pasted as-is, from any directory, with spaces and quotes in the paths
+        out = self.read("note")
+        cmd = out.split("with: ", 1)[1].split(" on|review|off", 1)[0]
+        p = subprocess.run(["sh", "-c", cmd + " review"], capture_output=True, text=True, cwd="/",
+                           env={k: v for k, v in os.environ.items() if k not in ("CLAUDE_PLUGIN_DATA", "CLAUDE_PROJECT_DIR")})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.only(self.read("note"), "review")
+
+    def test_set_rejects_other_words(self):
+        # negative control: nothing but on / review / off is saved
+        for junk in ("yes", "", "on off", "0", "../x"):
+            rc, _, err = self.sh("set", junk)
+            self.assertEqual(rc, 2, junk)
+            self.assertIn("usage", err)
+        self.assertFalse(os.path.exists(self.data))
+        self.put("OFF")
+        self.assertEqual(self.read("get").strip(), "off")
+
+    def test_unknown_word_in_file_means_never_asked(self):
+        self.put("on")
+        (f,) = [x for x in self.files() if os.sep + "choices" + os.sep in x]
+        for junk in ("yes\n", "", "onn\n"):
+            with open(f, "w") as fh:
+                fh.write(junk)
+            self.only(self.read("note"), "unset")
+
+    def test_fallback_data_folder(self):
+        home = self.folder("home")
+        env = {"HOME": home}
+        self.assertEqual(self.sh("set", "review", env_extra=env, data=False)[0], 0)
+        self.assertTrue(os.path.isdir(os.path.join(home, ".claude", "plugins", "data", "shepherd-shepherd-vita", "choices")))
+        rc, out, _ = self.sh("get", env_extra=env, data=False)
+        self.assertEqual((rc, out.strip()), (0, "review"))
+
+    @unittest.skipIf(hasattr(os, "geteuid") and os.geteuid() == 0, "root reads and writes anything")
+    def test_unreadable_or_unwritable(self):
+        self.put("on")
+        (f,) = [x for x in self.files() if os.sep + "choices" + os.sep in x]
         os.chmod(f, 0)
         self.addCleanup(os.chmod, f, 0o644)
-        env = dict(os.environ, CLAUDE_PLUGIN_DATA=d)
-        p = subprocess.run(["sh", self.HOOK], capture_output=True, text=True, env=env)
-        self.assertEqual((p.returncode, p.stderr), (0, ""))
-        self.only(p.stdout, "unset")
+        self.only(self.read("note"), "unset")
+        choices = os.path.dirname(f)
+        os.chmod(choices, 0o500)
+        self.addCleanup(os.chmod, choices, 0o755)
+        rc, _, err = self.sh("set", "off")
+        self.assertEqual(rc, 1)
+        self.assertIn("could not save", err)
 
 
 if __name__ == "__main__":

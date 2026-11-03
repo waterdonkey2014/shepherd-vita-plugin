@@ -1,7 +1,8 @@
 # Contributing a Vita discovery
 
-If you use the plugin with Claude, it can do this for you: the first time it's used, Claude asks once whether you want new findings
-sent back (each one, or each one after you've seen it, or none), and you can change that any time by asking it. Either way works:
+If you use the plugin with Claude, it can do this for you: the first time it's used in a project (or a new git worktree), Claude asks
+once whether you want new findings sent back (each one, or each one after you've seen it, or none), and you can change that any time
+by asking it. Either way works:
 the engine and the plugin don't depend on it.
 
 Open an issue with the template that fits -- **Vita discovery** (a finding, success or failure), **Device measurement** (numbers from a
