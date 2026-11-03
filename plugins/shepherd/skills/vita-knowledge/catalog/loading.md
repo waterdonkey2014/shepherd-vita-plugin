@@ -53,3 +53,4 @@ anything stored must be faster to read than to rebuild. Exact = identical bytes 
 | LOAD-046 | Boot data on the PCH-2000's built-in storage | PARKED | yes | only if a device A/B shows a gain; hard write limits on soldered flash |
 | LOAD-047 | Tiny launcher eboot + engine module behind an early logo | VERIFIED (start) | yes | TR-010, GT-001 |
 | LOAD-048 | Shader cache on the card | VERIFIED | yes | TR-003 |
+| LOAD-049 | Test loaders both from local storage and from a delayed source: loads that finish faster than authored expose races | THEORETICAL | yes | GT-015 |

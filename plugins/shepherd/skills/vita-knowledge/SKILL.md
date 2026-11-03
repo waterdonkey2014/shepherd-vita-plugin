@@ -51,5 +51,7 @@ Platform-neutral patterns (when a technique helps, when it hurts, how to measure
 - A technique proven elsewhere (PC, other consoles) is not proven on the Vita until measured here.
 - New findings: record them in the same format and propose them upstream (see CONTRIBUTING in the repository); they enter as EXPERIMENTAL
   or OBSERVED until reviewed.
+- Entries marked "Runtime: Flash" come from Flash (ActionScript 3) games on RuffleVita, a Vita port of the Ruffle Flash player; the
+  others from a Unity game on a Mono port.
 - "Exact" in the catalog means the output (pixels, game state, sound) is unchanged; "no" rows are opt-in settings under a
   fidelity-first rule. Many rows were written for one Unity game -- check that the game you port does the same thing before relying on it.

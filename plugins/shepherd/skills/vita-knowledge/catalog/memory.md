@@ -37,3 +37,4 @@ how it is stored changes, never what the game computes.
 | MEM-030 | Zero-fill off the main core; PLD inside the GC; PHYCONT mapping (probe-gated) | THEORETICAL | yes | |
 | MEM-031 | Drop CPU copies of textures after upload; lazy file release | VERIFIED | yes | TR-004 |
 | MEM-032 | Share skeletal-animation data, lazy skins | VERIFIED | yes | TR-008 |
+| MEM-033 | Budget a Flash game's whole decoded bitmap size: they decode on first draw and stay | OBSERVED (host count) | -- | one 2008 game: 1,808 bitmaps = 195 MiB at 1x, ~361 MiB at 1.36x; upscaled art needs GPU-compressed textures (DXT5 ~ 8 bpp, ~90 MiB at 1.36x) |

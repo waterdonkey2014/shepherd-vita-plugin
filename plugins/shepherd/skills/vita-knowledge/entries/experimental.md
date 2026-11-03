@@ -24,3 +24,56 @@
 - Status: EXPERIMENTAL (exact off-device; off by default). Category: physics / CPU.
 - Result: Box2D's parallel-safe phases forked to workers and applied back in serial order; identical results. Off by default until a device
   A/B shows the forks pay on the A9 (the physics step was under 1 % of the main thread in the measured scenes).
+
+### EX-007 -- Real-time step for frame-locked Flash games
+- Status: EXPERIMENTAL (host: RuffleVita desktop build; installed on a Vita, its timing not yet measured there). Category: runtime /
+  timing. Runtime: Flash (ActionScript 3) on RuffleVita.
+- Source: maintainers (Flash side project, 2026-11); reproduced by maintainers: yes (host).
+- Problem: many Flash games step their logic by a constant every frame (`onUpdate(33)`, whatever time really passed) and play their
+  animations on timelines, one timeline frame per rendered frame. Below the authored frame rate the whole game runs in slow motion: 12 fps
+  of a 34 fps game is 35 % speed.
+- Fix / use: replace the constant with the time the update method already read from `getTimer()`, scaled to the authored step
+  (`elapsed * 1122 / 1000` for a 33 step at 34 fps) and capped (100 here) so collisions can't tunnel. A short bytecode patch.
+- Evidence: stage forced to 15 fps, level start to first tutorial, wall clock: original at 34 fps 13.0 s, original at 15 fps 29.5 s,
+  patched at 15 fps 13.3 s.
+- Limits: only what moves through that step keeps its speed. Timeline animations, and code that moves things a fixed amount per
+  `enterFrame` outside the step, still slow down -- read every `enterFrame` listener before trusting it.
+
+### EX-008 -- Smooth 60: frames at 60, timelines at their authored rate
+- Status: EXPERIMENTAL (host). Category: runtime / frame pacing. Runtime: Flash on RuffleVita (a patch to Ruffle's frame loop).
+- Source: maintainers; reproduced by maintainers: yes (host).
+- Fix / use: the player runs its frames (`enterFrame` scripts, drawing) at 60 per second while MovieClip timelines step from an
+  accumulator at the movie's own rate. On a frame between two timeline steps the Enter phase skips the playhead pass and only broadcasts
+  `enterFrame`; the construct, frame-script and exit phases run as usual (nothing new to do, so they cost little). A per-game opt-in,
+  set or cleared at every game start because the switch is global in the core.
+- Evidence (host; a 34 fps game already using EX-007): level start to first tutorial 12.98 s at 60 vs 13.00 s at 34; one second captured
+  frame by frame: 60 of 60 frames differ from the one before; the run cycle keeps its authored pace. With the setting off, screenshots
+  and instruction counts are byte-identical to before.
+- Limits: needs logic that follows the clock (EX-007), or the game runs 1.76x fast. Work per frame is unchanged, so 60 fps costs
+  ~1.76x the CPU per second. Anything moved a fixed amount per `enterFrame` outside the step speeds up. Compare GPU-041.
+
+### EX-009 -- Skip to the next object that needs work, natively
+- Status: EXPERIMENTAL (host; exact). Category: CPU / engine loop. Runtime: Flash on RuffleVita's AOT.
+- Source: maintainers; reproduced by maintainers: yes (host).
+- Problem: the game's render loop tested every object of the level for visibility every frame (~2,360 objects in 15 layers), though only
+  a handful change state per frame. With compiled code on, that loop was 63 % of all game-code time (sampling profiler).
+- Fix / use: an object needs work only when its on-screen test and its active state ("has a picture") disagree. The now-unused
+  visibility method gets a new signature and body -- `scan(i, list, view values)` returns the next index that needs work -- written in
+  ActionScript, so it is exact on its own, and the loop calls it at its head. The loop body is unchanged and re-checks whatever it gets.
+  The runtime swaps that one method for a native, matched by name plus parameter count so it can never apply to the unpatched game:
+  plain slot reads with slot ids cached per class, the same f64 test in the same operand order. Anything unexpected (an entry that
+  isn't an object, a field that isn't a slot, a value that isn't a number) stops the scan there and the game's own code takes over.
+- Evidence (host, deterministic timedemo): 5.10 -> 3.45 M instructions per frame (-32 %); byte-identical screenshots on all four levels,
+  native vs interpreted and new build vs previous build.
+- Limits: every object is still touched every frame, only cheaply. Skipping objects altogether needs proof that they never move
+  (ENG-023).
+
+### EX-010 -- Bytecode inlining and hoisting before AOT
+- Status: EXPERIMENTAL (host; exact). Category: CPU. Runtime: Flash (AVM2 bytecode).
+- Source: maintainers; reproduced by maintainers: yes (host).
+- Fix / use: a 4x4 matrix-times-vector that read its elements through 16 `getElem(r, c)` calls reads the array directly; a per-object
+  loop reads four display-object getters once before the loop instead of four times per object; a one-caller test is inlined. A small
+  AVM2 re-assembler with branch fix-up makes length-changing edits safe -- it round-trips all 3,293 method bodies of the game
+  byte-identically before any edit is trusted.
+- Evidence: interpreted, 15.69 -> 8.94 M instructions per frame (-43 %), screenshots identical.
+- Limits: prove a hoisted value can't change inside the loop (read every writer); inline only methods with one caller and no overrides.

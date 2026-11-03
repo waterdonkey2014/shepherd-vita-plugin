@@ -81,3 +81,37 @@ off-device with the failure reproduced first).
 - Fix: in a module, bind those three at first use (trampolines, as in GT-001) or supply replacements; for a network-free eboot policy,
   exempt exactly those three (`vita-imports.py --allow-newlib-net`).
 - Found: running the plugin's import check on its own example program (v0.3), traced with `-Wl,-Map,--cref`.
+
+### GT-015 -- Fast local loads expose races that slow internet hid
+- Status: VERIFIED (the failure reproduced on a host in Ruffle with timestamped beacons; the fix confirmed on a device: the game loads and
+  plays). Category: loading / timing. Runtime: Flash.
+- Source: maintainers (Flash side project, 2026-11); reproduced by maintainers: yes.
+- Problem: a 2008 preloader's frame script dispatches "intro reached" and then calls `stop()`; when loading has already finished, the
+  listener answers with `gotoAndPlay("out")` inside the dispatch. Flash Player queues that goto together with its play, so "out" plays.
+  Ruffle before ruffle-rs/ruffle#24684 applied the play at once and the trailing `stop()` cancelled it: the loading bar froze. Over 2008
+  internet the loads always finished after that frame; from a memory card they finish in under a second, before it.
+- Fix / use: swap the two calls (`stop(); dispatchEvent(...)`: same bytes, same length), or use a Ruffle that has #24684 (Sept 2026).
+- Evidence: Flash Player 32 and Ruffle on the same files, with HTTP pings injected into the preloader's methods: both loads done at
+  0.91 s, the frame script at 1.88 s; Ruffle stopped after it, Flash Player went on.
+- Limits: suspect any loader or intro that assumes the network is slower than its own animation.
+
+### GT-016 -- AOT covers only what ran while it was emitting
+- Status: OBSERVED (host). Category: runtime / AOT. Runtime: Flash on RuffleVita (applies to any record-then-compile AOT).
+- Source: maintainers; reproduced by maintainers: yes (host).
+- Problem: RuffleVita's AOT translator compiles a method when it first runs during the emit session, and the device uses it only if the
+  shipped bytes fingerprint the same. An emit over one level left the other levels' own code interpreted -- those levels were locked,
+  because unlocks came from a web service that no longer exists -- and an emit from a traced or patched test build left the changed
+  methods interpreted in the build that shipped.
+- Fix / use: emit from the exact files you ship, and play every level and mode during the emit (a test-only unlock patch is fine: the
+  methods it changes simply stay out of the shipped table). Then count the fingerprints in the eboot (GT-017).
+- Evidence: one level 667 game methods compiled; all four levels 863; screenshots identical compiled vs interpreted on all four.
+
+### GT-017 -- An eboot's strings and constants are hidden until inflated
+- Status: VERIFIED (reproducible: the check below on three builds). Category: tooling.
+- Source: maintainers; reproduced by maintainers: yes.
+- Problem: searching a VPK's `eboot.bin` for compiled-method fingerprints, version strings or settings labels finds nothing, because the
+  SELF's segments are zlib-compressed.
+- Fix / use: find each zlib stream (`78` followed by `01` / `5E` / `9C` / `DA`, keeping only streams that inflate to something
+  sizeable), inflate, then search. A build check that counts every fingerprint of the compiled table (1411 of 1411 here) catches a
+  stale or partial build before it reaches a Vita.
+- Limits: a check that finds no streams must fail loudly, or "0 found" looks like a result. `vita-vpk-check.py` doesn't do this yet.

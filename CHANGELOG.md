@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased -- contributions
+- Knowledge from a second runtime -- Flash (ActionScript 3) games on RuffleVita, all host-measured so far: EX-007 (real-time step for
+  frame-locked games), EX-008 (smooth 60 with timelines at their authored rate), EX-009 (native skip to the next object that needs work),
+  EX-010 (bytecode inlining and hoisting); GT-015 (fast local loads expose races), GT-016 (AOT covers only what ran during the emit),
+  GT-017 (inflate an eboot before searching it); catalog rows RT-062..066, ENG-023..024, MEM-033, FID-016, LOAD-049; patterns OP-029
+  (skip the iterations that do nothing) and OP-030 (decouple display rate from logic and animation rates).
 - Sending findings back is now an explicit choice: the first time Claude uses the plugin it asks once whether new findings should go
   back to Shepherd (*send them*, *show me each one first*, *no thanks*), and the answer is kept (`on` / `review` / `off` in the plugin's
   data folder). Change it any time by asking Claude. A session-start hook (`hooks/session-start.sh`) tells Claude the current choice;

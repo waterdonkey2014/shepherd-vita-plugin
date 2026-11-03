@@ -67,3 +67,8 @@ backend), and an experimental baseline JIT. "Exact" = the game computes the same
 | RT-059 | Value-profiled memoization: a small exact-input cache only for provably pure methods called with repeating inputs | THEORETICAL (research) | yes | only where the lookup costs less than the work (one RAM miss ~ 100+ arithmetic ops) |
 | RT-060 | Self-disabling native method table: native versions of the hottest game methods keyed by assembly MVID + token + IL hash | THEORETICAL | yes | TheFloW's GTA: San Andreas Vita port; each entry proven bit-identical in lockstep; turns itself off when the IL changes |
 | RT-061 | IL -> C for a small hot set | THEORETICAL | yes | only if the profile shows a small set covering ~80 % of game self-time |
+| RT-062 | Fixed-step logic follows the real clock, capped (games that pass a constant step every frame) | EXPERIMENTAL | no (speed kept, frames differ) | EX-007; Flash; timelines still play per frame |
+| RT-063 | Frames and logic at 60 while animations keep their authored rate | EXPERIMENTAL | no (opt-in, smoother) | EX-008; Flash; needs RT-062-style logic; GPU-041 |
+| RT-064 | One hot method replaced by a native, its script version kept exact as the fallback, matched by name + signature | EXPERIMENTAL | yes | EX-009; the RT-060 idea built once, in another runtime |
+| RT-065 | AOT emit sessions that play every level and mode, from the exact shipped files | OBSERVED | yes | GT-016 |
+| RT-066 | Bytecode inlining and hoisting before AOT (one-caller methods, loop-invariant getters) | EXPERIMENTAL | yes | EX-010; a re-assembler that round-trips every body first |

@@ -9,7 +9,7 @@ Each pattern: what it is, when it helps, when it hurts, how to measure it, and w
 - Helps: loops that call `strlen`, `Count()` on a lazy sequence, or a size query that walks the data, once per iteration or per token.
 - Hurts: never in itself; watch for data that really changes inside the loop.
 - Measure: the loop's time against input size -- quadratic growth is the tell.
-- Vita: ENG-006 (lookup memos).
+- Vita: ENG-006 (lookup memos), EX-010 (getters read once per loop instead of per object).
 
 ### OP-002 -- Replace linear searches with an index
 - Helps: "is it already in the list?" checks, Find-by-name / by-type over all objects, repeated lookups in an unsorted array.
@@ -152,7 +152,7 @@ Each pattern: what it is, when it helps, when it hurts, how to measure it, and w
 - Helps: work spent on things fully hidden (behind opaque UI, off screen, under a black fade).
 - Hurts: culling that is not conservative (visible pops).
 - Measure: draws and pixels skipped; a "green hole" debug fill to prove nothing visible was skipped.
-- Vita: GPU-004, UI-004, GPU-013.
+- Vita: GPU-004, UI-004, GPU-013, EX-009 (the per-object visibility test itself, made cheap).
 
 ### OP-024 -- Shader simplification
 - Helps: fragment-bound scenes.
@@ -188,3 +188,17 @@ Each pattern: what it is, when it helps, when it hurts, how to measure it, and w
 - Hurts: stale entries (key them on everything that affects the result); unbounded growth.
 - Measure: hit rate, time saved, cache size; verify entries on first reuse.
 - Vita: LOAD-011, LOAD-043, RT-029.
+
+## Loops and frame pacing
+
+### OP-029 -- Skip the iterations that do nothing
+- Helps: per-frame loops over every object whose body does nothing for almost all of them (visibility that didn't change, timers not due).
+- Hurts: a skip test that isn't exactly the body's own condition (missed work); a scan that costs as much as the loop it replaces.
+- Measure: the share of iterations that change anything; the loop's time with and without the scan; byte-identical output.
+- Vita: EX-009.
+
+### OP-030 -- Decouple the display rate from logic and animation rates
+- Helps: logic that already follows a clock, on hardware that can draw faster than the content's authored rate.
+- Hurts: logic that moves things a fixed amount per frame (it runs fast); CPU per second rises with the display rate.
+- Measure: the wall-clock time of a scripted stretch at both rates; how many consecutive frames differ; CPU per second.
+- Vita: EX-007, EX-008, GPU-041.

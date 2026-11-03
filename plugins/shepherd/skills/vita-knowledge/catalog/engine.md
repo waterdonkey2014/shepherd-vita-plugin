@@ -27,3 +27,5 @@ same answers in the same order (exact), checked frame by frame.
 | ENG-020 | Event-driven structure / needs updates via timer wheels with ordered commit | THEORETICAL | yes | |
 | ENG-021 | No-op message elision / spin elision | THEORETICAL | yes | |
 | ENG-022 | Engine-side asset-group prediction: prepare the next scene's data when the context makes it likely (data only) | THEORETICAL | yes | the game's own load call still runs in order |
+| ENG-023 | Spatial index for objects proven never to move: skip off-screen ones entirely instead of testing each | THEORETICAL | yes | EX-009 is the exact step before it; the engine's own "never release" list (player, enemies, moving obstacles) names the movers, but every other class must be proven never to write a position |
+| ENG-024 | Local saves for games whose progress lived on a dead web service | THEORETICAL | -- | Flash: progress and scores went to a server that no longer exists, so nothing persists across restarts; a local store answering the same calls |
