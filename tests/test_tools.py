@@ -386,7 +386,7 @@ class MeasureHeader(unittest.TestCase):
 
 class ScrubLog(unittest.TestCase):
     SAMPLE = ("boot 97.9 s idle 36.97 ms clk arm 444 bus 222 gpu 222 MHz err 0x8002D003 v1.2.3.4\n"
-              "log dir /Users/" + "someone/vita/logs/run.txt on /Volumes/" + "Big Drive/x\n"
+              "log dir /" + "Users/someone/vita/logs/run.txt on /" + "Volumes/Big Drive/x\n"
               "C:\\Users\\someone\\AppData\\x  /home/someone/y\n"
               "mail me@" + "example.org from 10.0.0.42 and 8.8.8.8 doc 192.0.2.7 local 127.0.0.1\n"
               "mac 00:1A:2B:3C:4D:5E psid 0123456789abcdef0123456789ABCDEF steam 76561198000000001\n"

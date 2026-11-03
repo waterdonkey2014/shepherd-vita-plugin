@@ -5,7 +5,8 @@ usage: vita-scrub-log.py IN [OUT]      (OUT defaults to IN with .scrubbed before
        vita-scrub-log.py --check FILE   (exit 1 if FILE still holds anything this tool would remove)
 
 Replaces, keeping the numbers people need (timings, sizes, clocks, error codes):
-- home folders and their user names: /Users/<name>, /home/<name>, C:\\Users\\<name>, /Volumes/<drive name> -> <home> / <volume>
+- home folders and their user names (macOS Users/<name>, Linux home/<name>, Windows C:\\Users\\<name>) and macOS drive names
+  (Volumes/<drive name>) -> <home> / <volume>
 - e-mail addresses -> <email>
 - IPv4 addresses (except 0.0.0.0, 127.x and the documentation ranges) -> <ip>
 - MAC addresses -> <mac>
@@ -18,9 +19,9 @@ import os, re, sys
 
 RULES = [
     (re.compile(r"(?i)\b[A-Z]:\\Users\\[^\\\s]+"), r"<home>"),
-    (re.compile(r"/Users/[^/\s]+"), r"<home>"),
+    (re.compile(r"/(?:Users)/[^/\s]+"), r"<home>"),
     (re.compile(r"/home/[^/\s]+"), r"<home>"),
-    (re.compile(r"/Volumes/[^/\n]+?(?=/|\s|$)"), r"<volume>"),
+    (re.compile(r"/(?:Volumes)/[^/\n]+?(?=/|\s|$)"), r"<volume>"),
     (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), r"<email>"),
     (re.compile(r"\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b"), r"<mac>"),
     (re.compile(r"\b7656119\d{10}\b"), r"<steamid>"),
