@@ -19,6 +19,7 @@ When an experiment ends -- success or failure -- capture it while the evidence i
 ```
 ### <ID-placeholder> -- <one-line title>
 - Status: <label> (<device model, firmware, CFW / plugins; or "emulated / host">). Category: <area>.
+- Source: <maintainers (Shepherd kit N) | community (issue #, reporter's device)>; reproduced by maintainers: <yes | not yet>.
 - Problem / fact: <what happened, with error codes>.
 - Fix / use: <the technique, enough to repeat it>.
 - Evidence: <numbers and how they were measured; log lines>.
@@ -33,4 +34,5 @@ files (updates replace them).
 ## 4. Offer to contribute it
 Draft an issue for the Shepherd repository using its "Vita discovery" template (problem, technique, implementation, hardware and software,
 results, limits, evidence, outcome). Show the draft to the user; only they decide whether and where to post it. Never include game files,
-copyrighted assets, private paths, credentials or the user's private code.
+copyrighted assets, private paths, credentials or the user's private code. Run any log you attach through `tools/vita-scrub-log.py` (it strips home paths,
+IDs, addresses and account names and keeps the numbers); `--check` confirms a file is clean.

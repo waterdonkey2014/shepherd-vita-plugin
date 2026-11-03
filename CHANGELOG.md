@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased -- contributions
+- New tool `tools/vita-scrub-log.py`: a copy of a log that's safe to attach publicly (home paths, console / Steam IDs, addresses, MACs,
+  e-mails, account names removed; timings, sizes, clocks and error codes kept); `--check` for a file; tests with a negative control.
+- New issue templates: **Device measurement** and **Game port report** (beside **Vita discovery**).
+- Knowledge entries gain a **Source** line (maintainers / community, reproduced or not), so community findings never mix silently with
+  maintainer-verified ones.
+
 ## 0.4.0 -- the engine, released early
 - The Shepherd engine's first public release (separate source tree, MIT): Mono (.NET 8) fork for the Vita, Unity internal calls in C#,
   vitaGL renderer, Unity-exact 2D physics on Box2D, FMOD-compatible audio, Vita host + launcher, Mac-side tools, vlx off-device harness.

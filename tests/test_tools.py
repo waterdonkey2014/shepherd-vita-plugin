@@ -384,5 +384,47 @@ class MeasureHeader(unittest.TestCase):
             shutil.rmtree(d)
 
 
+class ScrubLog(unittest.TestCase):
+    SAMPLE = ("boot 97.9 s idle 36.97 ms clk arm 444 bus 222 gpu 222 MHz err 0x8002D003 v1.2.3.4\n"
+              "log dir /Users/" + "someone/vita/logs/run.txt on /Volumes/" + "Big Drive/x\n"
+              "C:\\Users\\someone\\AppData\\x  /home/someone/y\n"
+              "mail me@" + "example.org from 10.0.0.42 and 8.8.8.8 doc 192.0.2.7 local 127.0.0.1\n"
+              "mac 00:1A:2B:3C:4D:5E psid 0123456789abcdef0123456789ABCDEF steam 76561198000000001\n"
+              "account: lambfan99 user=foo\n")
+
+    def test_scrubs_private_and_keeps_numbers(self):
+        d = tempfile.mkdtemp()
+        try:
+            src = os.path.join(d, "run.txt")
+            with open(src, "w") as f:
+                f.write(self.SAMPLE)
+            rc, out = tool("vita-scrub-log.py", src)
+            self.assertEqual(rc, 0, out)
+            t = open(os.path.join(d, "run.scrubbed.txt")).read()
+            for gone in ("someone", "Big Drive", "example.org", "10.0.0.42", "8.8.8.8", "00:1A:2B", "0123456789abcdef",
+                         "76561198000000001", "lambfan99", "foo"):
+                self.assertNotIn(gone, t, gone)
+            for kept in ("97.9 s", "36.97 ms", "444", "0x8002D003", "v1.2.3.4", "192.0.2.7", "127.0.0.1"):
+                self.assertIn(kept, t, kept)
+            self.assertEqual(open(src).read(), self.SAMPLE)         # the input is never changed
+            rc, out = tool("vita-scrub-log.py", "--check", os.path.join(d, "run.scrubbed.txt"))
+            self.assertEqual(rc, 0, out)
+        finally:
+            shutil.rmtree(d)
+
+    def test_check_fails_on_unscrubbed(self):                       # negative control: --check must catch the raw file
+        d = tempfile.mkdtemp()
+        try:
+            src = os.path.join(d, "run.txt")
+            with open(src, "w") as f:
+                f.write(self.SAMPLE)
+            rc, out = tool("vita-scrub-log.py", "--check", src)
+            self.assertEqual(rc, 1, out)
+            rc, out = tool("vita-scrub-log.py", src, src)            # refuses to overwrite its input
+            self.assertEqual(rc, 2, out)
+        finally:
+            shutil.rmtree(d)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

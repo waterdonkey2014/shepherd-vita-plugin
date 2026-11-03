@@ -70,3 +70,8 @@ vita-pack-vpk -s param.sfo -b eboot.bin -a icon0.png=sce_sys/icon0.png sm_exampl
 Install the VPK, run it once, pull `ux0:data/sm_example/` with `vita-pull-logs.sh --data-dir data/sm_example --stats`.
 Status: the header is built and tested on the host and with vitasdk; its clock-measuring loop is the method verified on a PCH-2000
 (VH-001), but the header as a whole is EXPERIMENTAL until someone reports a device run.
+
+## vita-scrub-log.py
+Makes a copy of a log that is safe to attach to a public issue: removes home paths, console / Steam IDs, IP and MAC addresses, e-mail
+addresses and account names; keeps timings, sizes, clocks and error codes. `vita-scrub-log.py run.txt` writes `run.scrubbed.txt`
+(never overwrites the input); `vita-scrub-log.py --check FILE` exits 1 if the file still holds anything it would remove.
