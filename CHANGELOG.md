@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased -- contributions
+- Sending findings back is now an explicit choice: the first time Claude uses the plugin it asks once whether new findings should go
+  back to Shepherd (*send them*, *show me each one first*, *no thanks*), and the answer is kept (`on` / `review` / `off` in the plugin's
+  data folder). Change it any time by asking Claude. A session-start hook (`hooks/session-start.sh`) tells Claude the current choice;
+  it only prints text. `vita-record-discovery` follows the choice and sends a finding as a GitHub issue (scrubbed, one per finding).
+  The engine and the plugin work the same either way; there is no telemetry.
 - New tool `tools/vita-scrub-log.py`: a copy of a log that's safe to attach publicly (home paths, console / Steam IDs, addresses, MACs,
   e-mails, account names removed; timings, sizes, clocks and error codes kept); `--check` for a file; tests with a negative control.
 - New issue templates: **Device measurement** and **Game port report** (beside **Vita discovery**).

@@ -17,7 +17,7 @@ game's own compiled C# on a Mono runtime ported to the Vita). Weeks of device ru
 | `vita-tools` | Running the tools below: after a build (imports, package), after a device run (pull logs, numbers, history), adding measurement |
 | `shepherd-engine` | Porting a Unity game with the Shepherd engine: how it works, the order that worked, the hard rules, the first-game seams to fix |
 | `optimization-patterns` | Platform-neutral patterns (loading, memory, CPU, rendering, build-time, runtime): when each helps, when it hurts, how to measure it |
-| `vita-record-discovery` | Writing up your own finding (success or failure) in the knowledge-base format, ready to contribute |
+| `vita-record-discovery` | Writing up your own finding (success or failure) in the knowledge-base format, and sending it back to Shepherd if you chose that |
 
 Claude loads a skill only when a task needs it, so the plugin stays light.
 
@@ -49,6 +49,19 @@ New versions are published here as the port and the community learn more. Update
 claude plugin update shepherd@shepherd-vita
 ```
 or turn on auto-update for the `shepherd-vita` marketplace in the `/plugin` menu.
+
+## Sending findings back (your choice)
+The first time Claude uses the plugin, it asks you once whether new findings from your own port -- fixes, failures, measurements,
+gotchas -- should go back to the Shepherd project, so the engine and this knowledge base keep improving for everyone. Choices: *yes,
+send them*, *yes, but show me each one first*, or *no thanks*. Change your mind any time by telling Claude ("stop sending findings",
+"show me each one first"). Whatever you pick, the engine and the plugin work exactly the same: they're free and open source either way.
+
+- Findings are written up in your project's notes whichever you choose. Sending one means a GitHub issue posted under your account
+  (public), with logs run through `vita-scrub-log.py` and never game files, private paths, credentials or your private code.
+- Nothing is collected automatically; the plugin has no telemetry.
+- Your choice is one word (`on`, `review` or `off`) in the plugin's data folder (`~/.claude/plugins/data/shepherd-shepherd-vita/sharing`).
+  A small session-start hook (`hooks/session-start.sh`) reads it and tells Claude; it only prints text, and it writes and sends
+  nothing.
 
 ## Status labels
 VERIFIED (measured on a Vita) · OBSERVED · EXPERIMENTAL (passes off-device tests, not yet on a device) · FAILED (kept on purpose) ·

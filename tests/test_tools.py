@@ -426,5 +426,75 @@ class ScrubLog(unittest.TestCase):
             shutil.rmtree(d)
 
 
+class SharingHook(unittest.TestCase):
+    """hooks/session-start.sh: one note per choice (never asked / on / review / off); reads only, writes nothing, always exits 0."""
+    HOOK = os.path.join(ROOT, "plugins", "shepherd", "hooks", "session-start.sh")
+    KEYS = {"unset": "hasn't been asked yet", "on": "chose to send new findings back to the Shepherd project. When",
+            "review": "but to see each one first", "off": "chose not to send findings back"}
+
+    def hook(self, content=None, env_data=True):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        data = os.path.join(d, "data")
+        os.mkdir(data)
+        if content is not None:
+            with open(os.path.join(data, "sharing"), "w") as f:
+                f.write(content)
+        env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PLUGIN_DATA"}
+        if env_data:
+            env["CLAUDE_PLUGIN_DATA"] = data
+        else:
+            env["HOME"] = d
+        before = sorted(os.listdir(data))
+        p = subprocess.run(["sh", self.HOOK], capture_output=True, text=True, env=env)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertEqual(p.stderr, "")
+        self.assertEqual(sorted(os.listdir(data)), before, "the hook must not write")
+        return p.stdout
+
+    def only(self, out, state):
+        for s, key in self.KEYS.items():
+            (self.assertIn if s == state else self.assertNotIn)(key, out, "state %s" % state)
+
+    def test_each_choice(self):
+        self.only(self.hook(None), "unset")
+        self.only(self.hook("on\n"), "on")
+        self.only(self.hook("review"), "review")
+        self.only(self.hook("off\n"), "off")
+        self.only(self.hook("  OFF\r\n"), "off")
+
+    def test_unknown_word_means_never_asked(self):
+        # negative control: anything but on / review / off must not read as a yes
+        for junk in ("yes", "", "on off", "0"):
+            self.only(self.hook(junk), "unset")
+
+    def test_fallback_folder_without_plugin_data(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        folder = os.path.join(d, ".claude", "plugins", "data", "shepherd-shepherd-vita")
+        os.makedirs(folder)
+        with open(os.path.join(folder, "sharing"), "w") as f:
+            f.write("review\n")
+        env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PLUGIN_DATA"}
+        env["HOME"] = d
+        p = subprocess.run(["sh", self.HOOK], capture_output=True, text=True, env=env)
+        self.assertEqual(p.returncode, 0)
+        self.only(p.stdout, "review")
+
+    @unittest.skipIf(hasattr(os, "geteuid") and os.geteuid() == 0, "root reads anything")
+    def test_unreadable_file_is_never_asked(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        f = os.path.join(d, "sharing")
+        with open(f, "w") as fh:
+            fh.write("on\n")
+        os.chmod(f, 0)
+        self.addCleanup(os.chmod, f, 0o644)
+        env = dict(os.environ, CLAUDE_PLUGIN_DATA=d)
+        p = subprocess.run(["sh", self.HOOK], capture_output=True, text=True, env=env)
+        self.assertEqual((p.returncode, p.stderr), (0, ""))
+        self.only(p.stdout, "unset")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

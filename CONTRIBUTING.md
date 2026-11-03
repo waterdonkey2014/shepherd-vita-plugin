@@ -1,5 +1,9 @@
 # Contributing a Vita discovery
 
+If you use the plugin with Claude, it can do this for you: the first time it's used, Claude asks once whether you want new findings
+sent back (each one, or each one after you've seen it, or none), and you can change that any time by asking it. Either way works:
+the engine and the plugin don't depend on it.
+
 Open an issue with the template that fits -- **Vita discovery** (a finding, success or failure), **Device measurement** (numbers from a
 real Vita) or **Game port report** (how a game runs) -- or a pull request editing an entries file. Before attaching any log, run it through
 `plugins/shepherd/tools/vita-scrub-log.py` (it strips home paths, console / Steam IDs, addresses and account names, and keeps the
