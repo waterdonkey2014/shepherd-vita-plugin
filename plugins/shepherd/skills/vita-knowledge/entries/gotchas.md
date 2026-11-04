@@ -115,3 +115,25 @@ off-device with the failure reproduced first).
   sizeable), inflate, then search. A build check that counts every fingerprint of the compiled table (1411 of 1411 here) catches a
   stale or partial build before it reaches a Vita.
 - Limits: a check that finds no streams must fail loudly, or "0 found" looks like a result. `vita-vpk-check.py` doesn't do this yet.
+
+### GT-018 -- The Mac's Finder replaces a same-name folder; VitaShell's paste merges
+- Status: OBSERVED (VitaShell source + a libarchive unpack on a host; a device paste is pending). Category: delivery / tooling. Runtime: any.
+- Source: maintainers (2026-11); reproduced by maintainers: yes (host).
+- Problem: with the card mounted over USB, dragging a folder onto the card's folder of the same name makes the Finder offer
+  **Replace**. That deletes everything in the card's folder that the new one lacks: saves, game files staged once, caches. Copying the
+  files one by one is safe but slow, and it is easy to get wrong on a phone.
+- Fix / use: ship each test build as ONE zip whose top folder mirrors the card's (`<app>/...`). Copy that one file to the card, open it
+  in VitaShell (X: it browses like a folder), TRIANGLE -> Copy on the top folder, go to the parent folder (e.g. `ux0:data/`), TRIANGLE ->
+  Paste. VitaShell reads archives with libarchive. Pasting from one creates folders that are missing and tolerates ones that exist
+  (`sceIoMkdir`, EEXIST ignored), and opens each file with `SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC`: same-name files are replaced,
+  everything else stays, there is no prompt, and a file that fails is removed.
+- Pack it carefully:
+  - Store the members uncompressed, so the Vita unpacks at copy speed.
+  - Keep each file's own modification time, never a fixed date: apps that cache "already verified" by size + mtime would otherwise skip
+    a check.
+  - Refuse any file that would land where an app reads it as a live switch (an env or args file at the top of the app's folder).
+  - Unpack the finished zip on the Mac with `bsdtar` (also libarchive) and compare every file.
+- Limits:
+  - A merge never deletes. A build that must remove a stale file has to say so in its steps.
+  - The card needs room for the zip plus the new files until the zip is deleted.
+  - Read from VitaShell's current source; an old VitaShell may differ.
