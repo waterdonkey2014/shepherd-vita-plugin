@@ -40,7 +40,8 @@
   `enterFrame` outside the step, still slow down -- read every `enterFrame` listener before trusting it.
 
 ### EX-008 -- Smooth 60: frames at 60, timelines at their authored rate
-- Status: EXPERIMENTAL (host). Category: runtime / frame pacing. Runtime: Flash on RuffleVita (a patch to Ruffle's frame loop).
+- Status: EXPERIMENTAL (host; first device run 2026-11-04: menus at 60 fps, gameplay below 60 -- owner's report, no log yet).
+  Category: runtime / frame pacing. Runtime: Flash on RuffleVita (a patch to Ruffle's frame loop).
 - Source: maintainers; reproduced by maintainers: yes (host).
 - Fix / use: the player runs its frames (`enterFrame` scripts, drawing) at 60 per second while MovieClip timelines step from an
   accumulator at the movie's own rate. On a frame between two timeline steps the Enter phase skips the playhead pass and only broadcasts
@@ -51,6 +52,13 @@
   and instruction counts are byte-identical to before.
 - Limits: needs logic that follows the clock (EX-007), or the game runs 1.76x fast. Work per frame is unchanged, so 60 fps costs
   ~1.76x the CPU per second. Anything moved a fixed amount per `enterFrame` outside the step speeds up. Compare GPU-041.
+- Device gotcha (fixed): the timeline accumulator must take the real time given to the player's tick, not 1/60 s per frame drawn.
+  The first version did the latter; on the Vita, gameplay drew fewer than 60 frames and could not catch up, so animations slowed (a
+  run cycle at ~half speed at 30 fps) while clock-driven movement kept its speed. Fixed: steps follow tick time, at most one per
+  frame, excess dropped. Host check with every game frame slowed to ~22 ms: 30 fps, 30 timeline steps/s (the old code: ~17), game
+  timing unchanged.
+- With V-Sync on, a frame that misses 16.7 ms waits for the next refresh: anything over it runs at 30 fps, where this mode gains
+  nothing over the authored rate. It only pays when the whole frame (game code + drawing) fits in 16.7 ms.
 
 ### EX-009 -- Skip to the next object that needs work, natively
 - Status: EXPERIMENTAL (host; exact). Category: CPU / engine loop. Runtime: Flash on RuffleVita's AOT.
