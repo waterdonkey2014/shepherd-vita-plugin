@@ -4,6 +4,8 @@
 - GT-018 (any runtime): the Mac's Finder replaces a same-name folder on the card, but VitaShell's paste from a zip merges. So ship a
   test build as one zip that mirrors the card's folders: stored members, each file's own modification time, no live switch file at
   the top, checked after unpacking with libarchive.
+- GT-018 is now CONFIRMED on a device (a real paste over a same-name folder kept the card's files). GT-019 (any runtime): the Vita
+  refuses to install a VPK whose icon or LiveArea PNGs are not 8-bit palette images; Pillow writes short index depths for small palettes.
 - Knowledge from a second runtime -- Flash (ActionScript 3) games on RuffleVita, all host-measured so far: EX-007 (real-time step for
   frame-locked games), EX-008 (smooth 60 with timelines at their authored rate), EX-009 (native skip to the next object that needs work),
   EX-010 (bytecode inlining and hoisting); GT-015 (fast local loads expose races), GT-016 (AOT covers only what ran during the emit),

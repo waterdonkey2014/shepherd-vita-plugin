@@ -117,7 +117,9 @@ off-device with the failure reproduced first).
 - Limits: a check that finds no streams must fail loudly, or "0 found" looks like a result. `vita-vpk-check.py` doesn't do this yet.
 
 ### GT-018 -- The Mac's Finder replaces a same-name folder; VitaShell's paste merges
-- Status: OBSERVED (VitaShell source + a libarchive unpack on a host; a device paste is pending). Category: delivery / tooling. Runtime: any.
+- Status: CONFIRMED (VitaShell source, a libarchive unpack on a host, and a device paste: a 333 MiB, 162-file build pasted over a
+  card folder of the same name; the card's saves and staged files stayed, and every run afterwards passed). Category: delivery / tooling.
+  Runtime: any.
 - Source: maintainers (2026-11); reproduced by maintainers: yes (host).
 - Problem: with the card mounted over USB, dragging a folder onto the card's folder of the same name makes the Finder offer
   **Replace**. That deletes everything in the card's folder that the new one lacks: saves, game files staged once, caches. Copying the
@@ -137,3 +139,20 @@ off-device with the failure reproduced first).
   - A merge never deletes. A build that must remove a stale file has to say so in its steps.
   - The card needs room for the zip plus the new files until the zip is deleted.
   - Read from VitaShell's current source; an old VitaShell may differ.
+
+### GT-019 -- The Vita refuses to install a VPK whose sce_sys PNGs are not 8-bit palette images
+- Status: OBSERVED (device: the two VPKs with such images failed to install, the three with 8-bit palette icons installed; the same two
+  VPKs with only their images re-encoded are not installed yet, so the fix is not yet confirmed). Category: packaging / tooling.
+  Runtime: any.
+- Source: maintainers (2026-11); reproduced by maintainers: yes (device).
+- Problem: VitaShell's install of a VPK fails when `sce_sys/icon0.png` or a LiveArea image (`sce_sys/livearea/contents/bg.png`,
+  `startup.png`) is not an 8-bit palette PNG. Two ways to get there without noticing:
+  - Pillow's `convert("P", colors=16).save(..., optimize=True)` writes 1-, 2- or 4-bit indices when the palette is short. The file is a
+    palette PNG, and the tool's comment says "8-bit palette", but the installer refuses it.
+  - An icon saved as RGB or RGBA, which is what most image editors do by default.
+  Three icons in the same build that were 8-bit palette installed fine; a VPK with no icon at all also installs (default bubble).
+- Fix / use: write sce_sys images as 8-bit palette PNGs. With Pillow, pad the palette to 256 entries before saving
+  (`p.putpalette(pal + [0] * (768 - len(pal)))`), which makes it write 8-bit indices. Check the result in the build: read the IHDR
+  (bytes 16-25) and require bit depth 8 and colour type 3, both in the source tree and in the finished VPK.
+- Limits: the images must also keep their expected sizes (icon0 128x128, bg 840x500, startup 280x158). Not tested here: whether the
+  installer also limits the palette size or rejects other PNG chunks.
