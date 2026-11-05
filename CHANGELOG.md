@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased -- contributions
+- EX-011 (Flash on RuffleVita, host): size restored art by how big the game really draws it. A texel census over scripted runs, art
+  kept at twice natural size where it is drawn bigger, and half-size copies as plain textures picked per draw (GPU-047, GPU-048).
 - GT-018 (any runtime): the Mac's Finder replaces a same-name folder on the card, but VitaShell's paste from a zip merges. So ship a
   test build as one zip that mirrors the card's folders: stored members, each file's own modification time, no live switch file at
   the top, checked after unpacking with libarchive.

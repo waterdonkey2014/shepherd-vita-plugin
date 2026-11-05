@@ -85,3 +85,27 @@
   byte-identically before any edit is trusted.
 - Evidence: interpreted, 15.69 -> 8.94 M instructions per frame (-43 %), screenshots identical.
 - Limits: prove a hoisted value can't change inside the loop (read every writer); inline only methods with one caller and no overrides.
+
+### EX-011 -- Size restored art by how big the game really draws it, with smaller copies for the small moments
+- Status: EXPERIMENTAL (host; device run pending). Category: GPU / art pipeline. Runtime: Flash on RuffleVita (any engine that draws
+  bitmaps under arbitrary transforms).
+- Source: maintainers; reproduced by maintainers: yes (host).
+- Problem: upscaled or AI-restored pictures were all resized to one factor, the stage-to-screen scale, which is pixel-exact only when the
+  game draws a picture at its natural size. Flash games scale pictures freely: one game's title cards drop onto the screen from 2.7x their
+  resting size, and a smoke picture is drawn at 20-80 %. A bigger copy alone fixes the big moment but turns grainy at rest, because the
+  renderer minifies with plain bilinear sampling and no mipmaps.
+- Fix / use: (1) a texel census in the renderer (a test switch): for every draw of a bitmap -- direct bitmap draws, CPU-batched bitmap
+  fills and GPU bitmap fills -- the singular values of the texel-to-screen map, keeping the most and least per texture size. Scripted runs
+  over menus and every level give each picture's real on-screen range. Sanity check: untouched pictures read exactly the stage scale.
+  (2) A picture drawn bigger than natural is kept at twice its natural size; one drawn much smaller stays natural. Both are listed in a
+  sidecar file next to the movie, by texture size. (3) The renderer gives listed textures half-size copies (2x2 box average of the
+  premultiplied pixels, built once at upload) as plain textures, not GL mipmaps, so nothing depends on the driver's mipmap support for
+  non-power-of-two sizes. UVs are normalised, so a copy draws in place of the full texture. Each draw picks the copy nearest one texel
+  per screen pixel (GL's nearest-level rule, from the smaller singular value). Twice natural makes the first copy exactly the natural-
+  size picture, so the resting look matches the old build and only the big moments gain.
+- Evidence (host): in one game, 1,321 pictures were drawn and 163 of them bigger than natural at some point. Title cards mid-drop are
+  visibly sharper; at rest they match the previous build within filter rounding; every other frame checked is byte-identical (81 sampled
+  frames of a level, the title before the drop). Memory: about +7 MiB for five pictures.
+- Limits: the census is per texture size, so pictures sharing a size share a row (the larger wins). Coverage is only as good as the
+  scripted runs. Copies are chosen per draw without blending between levels, so a picture shrinking smoothly can step at a level change.
+  Device check pending: the copies' memory and their upload time at first draw.
