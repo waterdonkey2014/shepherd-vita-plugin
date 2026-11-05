@@ -141,9 +141,8 @@ off-device with the failure reproduced first).
   - Read from VitaShell's current source; an old VitaShell may differ.
 
 ### GT-019 -- The Vita refuses to install a VPK whose sce_sys PNGs are not 8-bit palette images
-- Status: OBSERVED (device: the two VPKs with such images failed to install, the three with 8-bit palette icons installed; the same two
-  VPKs with only their images re-encoded are not installed yet, so the fix is not yet confirmed). Category: packaging / tooling.
-  Runtime: any.
+- Status: CONFIRMED (device: the two VPKs with such images failed to install, the three with 8-bit palette icons installed, and the
+  same two VPKs with only their images re-encoded as 8-bit palette installed and ran). Category: packaging / tooling. Runtime: any.
 - Source: maintainers (2026-11); reproduced by maintainers: yes (device).
 - Problem: VitaShell's install of a VPK fails when `sce_sys/icon0.png` or a LiveArea image (`sce_sys/livearea/contents/bg.png`,
   `startup.png`) is not an 8-bit palette PNG. Two ways to get there without noticing:
