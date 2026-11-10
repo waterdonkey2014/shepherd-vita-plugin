@@ -56,6 +56,6 @@ new word and confirm in one line. Nothing is ever collected automatically; the p
 - Never include game files, copyrighted assets, private paths, credentials, or the user's private code or unreleased project details.
   Run any log you attach through `tools/vita-scrub-log.py` (it strips home paths, IDs, addresses and account names and keeps the
   numbers); `--check` confirms a file is clean. If a finding can't be shared without something private, keep it local and say why.
-- With the GitHub CLI signed in: `gh issue create --repo <owner>/<repo> --title "[discovery] <title>" --body-file <draft>`. Without it,
+- With the GitHub CLI signed in: `gh issue create --repo waterdonkey2014/shepherd-vita-plugin --title "[discovery] <title>" --body-file <draft>`. Without it,
   give them the text and the repository's new-issue page so they can post it themselves. If posting fails, the draft stays in their
   notes; say so.

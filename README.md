@@ -35,13 +35,12 @@ Python 3 standard library and POSIX sh -- nothing to install. Tests: `python3 te
 ## Install
 In Claude Code:
 ```
-/plugin marketplace add <owner>/<repo>
+/plugin marketplace add waterdonkey2014/shepherd-vita-plugin
 /plugin install shepherd@shepherd-vita
 ```
-(`<owner>/<repo>` = this repository once it is published.)
 
-Progress of the first port, every kit done and planned: the Shepherd engine repository's `docs/ledger/` page
-(`https://<owner>.github.io/shepherd/ledger/` once it is public).
+The engine itself: [waterdonkey2014/shepherd](https://github.com/waterdonkey2014/shepherd). Its first port's kit-by-kit page, Shepherd Progress:
+[https://waterdonkey2014.github.io/shepherd-progress/](https://waterdonkey2014.github.io/shepherd-progress/).
 
 ## Updates
 New versions are published here as the port and the community learn more. Update with:
